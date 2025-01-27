@@ -4,7 +4,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.net.URL;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -17,6 +16,7 @@ public class ValidationService {
     // load les informations des utilisateurs des la premier reference statique
     static {
         loadUsers();
+        System.out.println(GSON.toJson(users));
     }
 
     public static boolean isValidIpv4(String ip) {
@@ -51,7 +51,7 @@ public class ValidationService {
 
     // Helper functions for IO with user_data file
     private static void loadUsers() {
-        try (FileReader reader = new FileReader(getFileFromResources(Utils.USER_DATA_PATH))) {
+        try (FileReader reader = new FileReader(Utils.getFileFromResources(Utils.USER_DATA_PATH))) {
             users = GSON.fromJson(reader, new TypeToken<Map<String, String>>() {
             }.getType());
             if (users == null) {
@@ -65,24 +65,12 @@ public class ValidationService {
     }
 
     private static void saveUsers() {
-        try (FileWriter writer = new FileWriter(getFileFromResources(Utils.USER_DATA_PATH))) {
+        try (FileWriter writer = new FileWriter(Utils.getFileFromResources(Utils.USER_DATA_PATH))) {
             GSON.toJson(users, writer);
         } catch (IOException e) {
             throw new RuntimeException("Error saving users to file: " + Utils.USER_DATA_PATH, e);
         } catch (Exception e) {
             throw new RuntimeException("Unexpected error occurred while saving users.", e);
-        }
-    }
-
-    private static String getFileFromResources(String fileName) {
-        try {
-            URL resource = ValidationService.class.getClassLoader().getResource(fileName);
-            if (resource == null) {
-                throw new IllegalArgumentException("File not found in resources: " + fileName);
-            }
-            return resource.getFile();
-        } catch (Exception e) {
-            throw new RuntimeException("Error retrieving file from resources: " + fileName, e);
         }
     }
 }
