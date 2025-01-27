@@ -4,14 +4,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
+import java.net.URL;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 public class ValidationService {
+    // User-Pwd pairs loaded in-memory
     private static Map<String, String> users = new HashMap<>();
+    // Librairie de serialization de json
     private static final Gson GSON = new Gson();
 
+    // load les informations des utilisateurs des la premier reference statique
     static {
         loadUsers();
     }
@@ -23,6 +26,12 @@ public class ValidationService {
     public static boolean isValidPort(int port) {
         return port >= Utils.PORT_MIN && port <= Utils.PORT_MAX;
     }
+
+    /*
+     * Si un username n'est pas en memoire, le creer.
+     * sinon si le username existe mais le pwd est errone, erreur
+     * sinon si les deux sont existants, true.
+     */
 
     public static boolean isValidUser(String username, String password) {
         if (users.get(username) == null) {
@@ -40,6 +49,7 @@ public class ValidationService {
         }
     }
 
+    // Helper functions for IO with user_data file
     private static void loadUsers() {
         try (FileReader reader = new FileReader(getFileFromResources(Utils.USER_DATA_PATH))) {
             users = GSON.fromJson(reader, new TypeToken<Map<String, String>>() {
@@ -66,7 +76,7 @@ public class ValidationService {
 
     private static String getFileFromResources(String fileName) {
         try {
-            java.net.URL resource = ValidationService.class.getClassLoader().getResource(fileName);
+            URL resource = ValidationService.class.getClassLoader().getResource(fileName);
             if (resource == null) {
                 throw new IllegalArgumentException("File not found in resources: " + fileName);
             }
