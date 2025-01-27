@@ -8,10 +8,11 @@ import java.util.Queue;
 import java.util.Date;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 public class HistoryService {
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final int MAX_HISTORY_SIZE = 15;
     private static Queue<Message> messageHistory = new LinkedList<>();
 

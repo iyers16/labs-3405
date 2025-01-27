@@ -5,13 +5,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 public class ValidationService {
     // User-Pwd pairs loaded in-memory
     private static Map<String, String> users = new HashMap<>();
     // Librairie de serialization de json
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     // load les informations des utilisateurs des la premier reference statique
     static {
