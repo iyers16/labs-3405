@@ -1,6 +1,12 @@
 import java.util.Date;
+//import java.io.FileWriter;
+//import java.io.IOException;
+//import java.io.Writer;
+//
+//import com.google.gson.Gson;
 
 public class Serveur {
+
     public static void main(String[] args) {
         System.out.println(ValidationService.isValidIpv4("123.123.12.12"));
 
@@ -12,5 +18,18 @@ public class Serveur {
 
         System.out.println("Message History:");
         System.out.println(HistoryService.getFormattedHistory());
+//    	Person person = new Person("mkyong", 42);
+//        Gson gson = new Gson();
+//
+//        // write to this file
+//        try (Writer writer = new FileWriter("person.json")) {
+//
+//            // Convert the Java object `person` into a JSON data and write to a file
+//            gson.toJson(person, writer);
+//
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 }
+

@@ -1,4 +1,6 @@
 import java.io.FileNotFoundException;
+import java.io.Reader;
+import java.io.Writer;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -23,10 +25,11 @@ public class HistoryService {
 
     // Load message history from file
     private static void loadHistory() {
-        try (FileReader reader = new FileReader(Utils.getFileFromResources(Utils.HISTORY_PATH))) {
+        try (Reader reader = new FileReader(Utils.getFileFromResources(Utils.HISTORY_PATH))) {
             // Load history as a list, then transfer it to the queue
             List<Message> loadedHistory = GSON.fromJson(reader, new TypeToken<LinkedList<Message>>() {
             }.getType());
+            reader.close();
             if (loadedHistory != null) {
                 messageHistory.addAll(loadedHistory);
             }
@@ -39,8 +42,9 @@ public class HistoryService {
 
     // Save message history to file
     private static void saveHistory() {
-        try (FileWriter writer = new FileWriter(Utils.getFileFromResources(Utils.HISTORY_PATH))) {
+        try (Writer writer = new FileWriter(Utils.getFileFromResources(Utils.HISTORY_PATH))) {
             GSON.toJson(messageHistory, writer);
+            writer.close();
         } catch (IOException e) {
             throw new RuntimeException("Error saving message history to file: " + Utils.HISTORY_PATH, e);
         }

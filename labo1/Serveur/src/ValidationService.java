@@ -1,6 +1,8 @@
 
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,9 +54,10 @@ public class ValidationService {
 
     // Helper functions for IO with user_data file
     private static void loadUsers() {
-        try (FileReader reader = new FileReader(Utils.getFileFromResources(Utils.USER_DATA_PATH))) {
+        try (Reader reader = new FileReader(Utils.getFileFromResources(Utils.USER_DATA_PATH))) {
             users = GSON.fromJson(reader, new TypeToken<Map<String, String>>() {
             }.getType());
+            reader.close();            
             if (users == null) {
                 users = new HashMap<>();
             }
@@ -66,8 +69,9 @@ public class ValidationService {
     }
 
     private static void saveUsers() {
-        try (FileWriter writer = new FileWriter(Utils.getFileFromResources(Utils.USER_DATA_PATH))) {
+        try (Writer writer = new FileWriter(Utils.getFileFromResources(Utils.USER_DATA_PATH))) {
             GSON.toJson(users, writer);
+            writer.close();
         } catch (IOException e) {
             throw new RuntimeException("Error saving users to file: " + Utils.USER_DATA_PATH, e);
         } catch (Exception e) {
