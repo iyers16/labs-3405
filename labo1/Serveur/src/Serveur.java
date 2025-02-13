@@ -1,38 +1,48 @@
-import java.util.Date;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-
-//import java.io.FileWriter;
-//import java.io.IOException;
-//import java.io.Writer;
-//
-//import com.google.gson.Gson;
+import java.util.Scanner;
+import java.io.IOException;
 
 public class Serveur {
-	
 	private static ServerSocket Listener;
+    private static AuthService authService;
+	
     public static void main(String[] args) throws Exception {
     	
-    	int clientNumber = 0;
-    	String serverAddress = "127.0.0.1";
-    	int serverPort = 5000;
-    	
-    	Listener = new ServerSocket();
-    	Listener.setReuseAddress(true);
-    	
-    	InetAddress serverIP = InetAddress.getByName(serverAddress);
-    	Listener.bind(new InetSocketAddress(serverIP, serverPort));
-    	
-    	System.out.format("The server is running on %s:%d%n", serverAddress, serverPort);
-    	
-    	try {
-    		while(true) {
-    			new ClientHandler(Listener.accept(), clientNumber++).start();
-    		} 
-    	} finally {
-    			Listener.close();
-    	}
+    	try (Scanner scanner = new Scanner(System.in)) {
+			System.out.print("Entrez l'adresse IP du serveur (ex: 127.0.0.1) : ");
+			// String serverAddress = scanner.nextLine();
+			String serverAddress = "127.0.0.1";
+			int serverPort = 5000;
+			/* 
+			do {
+			    System.out.print("Entrez le port d'écoute (entre 5000 et 5050) : ");
+			    serverPort = scanner.nextInt();
+			} while (serverPort < Utils.PORT_MIN || serverPort > Utils.PORT_MAX);
+			
+			scanner.nextLine();
+			*/
+			
+			try {
+				Listener = new ServerSocket();
+				Listener.setReuseAddress(true);
+				InetAddress serverIP = InetAddress.getByName(serverAddress);
+				Listener.bind(new InetSocketAddress(serverIP, serverPort));
+				
+				authService = new AuthService();
+				System.out.format("The server is running on %s:%d%n", serverAddress, serverPort);
+				
+				int clientNum = 0;
+				while(true) {
+					new ClientHandler(Listener.accept(), clientNum++, authService).start();
+				}
+			} catch (IOException e) {
+			    e.printStackTrace();
+			} finally {
+				Listener.close();
+			}
+		}
     	
     	
 //    	System.out.println(ValidationService.isValidIpv4("123.123.12.12"));
