@@ -5,65 +5,51 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class Client {
-	private static Socket socket;
-	
-	public static void main(String[] args) throws Exception {
-		Scanner scanner = new Scanner(System.in);
+    private static Socket socket;
+    private static DataInputStream in;
+    private static DataOutputStream out;
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
 
         System.out.print("Enter the server's IP address: ");
-        //String serverAddress = scanner.nextLine();
-        String serverAddress = "127.0.0.1";
+        String serverAddress = "127.0.0.1";  // Hardcoded for now
 
-        int port = 5000;
-        /*
-        do {
-            System.out.print("Enter server's port (between 5000 et 5050) : ");
-            port = scanner.nextInt();
-        } while (port < Utils.PORT_MIN || port > Utils.PORT_MAX);
-        
-        scanner.nextLine();
-         */
+        int port = 5000; // Hardcoded for now
+
         try {
             socket = new Socket(serverAddress, port);
-            System.out.format("Connected to serveur [%s:%d]%n", serverAddress, port);
+            System.out.format("Connected to server [%s:%d]%n", serverAddress, port);
 
-            DataInputStream in = new DataInputStream(socket.getInputStream());
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-            
-            if (!authenticate(in, out, scanner)) {
+            in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
+
+            AuthHandler authHandler = new AuthHandler(in, out, scanner);
+            if (!authHandler.authenticate()) {
                 System.out.println("Authentication failed. Closing connection.");
                 socket.close();
                 return;
             }
-			
-			System.out.print("✍️  Entrez un message : "); 
-			String message = scanner.nextLine(); 
-			out.writeUTF(message); 
-			out.flush();
-			 
-            
-            System.out.println("📤 Message envoyé au serveur !");
-            
-            scanner.close();
-            socket.close();
+
+            // User is authenticated, proceed to chat
+            System.out.print("Enter a message: ");
+            String message = scanner.nextLine();
+            out.writeUTF(message);
+            out.flush();
+
+            System.out.println("Message sent to the server!");
+
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (socket != null && !socket.isClosed()) {
+                    socket.close();
+                }
+                scanner.close();
+            } catch (IOException e) {
+                System.err.println("Error closing socket: " + e.getMessage());
+            }
         }
-	}
-	
-	private static boolean authenticate(DataInputStream in, DataOutputStream out, Scanner scanner) throws IOException {
-		System.out.print(in.readUTF() + " ");  
-	    String username = scanner.nextLine();
-	    out.writeUTF(username);
-
-	    System.out.print(in.readUTF() + " ");  
-	    String password = scanner.nextLine();
-	    out.writeUTF(password);
-
-	    String response = in.readUTF();
-	    System.out.println(response);
-
-	    return !response.startsWith("ERROR");
-	}
+    }
 }
-

@@ -11,7 +11,7 @@ public class Utils {
     public static final int PORT_MIN = 5000;
     public static final int PORT_MAX = 5050;
     public static final String USER_DATA_PATH = "src/resources/user_data.json";
-    public static final String HISTORY_PATH = "history.json";
+    public static final String HISTORY_PATH = "src/resources/history.json";
     public static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd@HH:mm:ss");
 
     public static final String getFilePath(String fileName) {

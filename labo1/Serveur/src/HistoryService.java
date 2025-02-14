@@ -1,77 +1,67 @@
-import java.io.FileNotFoundException;
-import java.io.Reader;
-import java.io.Writer;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Date;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 public class HistoryService {
+    private static Queue<Message> messages = new LinkedList<>();
+    private static final String CHAT_HISTORY_PATH = Utils.HISTORY_PATH;
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final int MAX_HISTORY_SIZE = 15;
-    private static Queue<Message> messageHistory = new LinkedList<>();
 
-    static {
-        loadHistory();
-        System.out.println(GSON.toJson(messageHistory));
+    public HistoryService() {
+        loadMessages();
     }
 
-    // Load message history from file
-    private static void loadHistory() {
-        try (Reader reader = new FileReader(Utils.getFileFromResources(Utils.HISTORY_PATH))) {
-            // Load history as a list, then transfer it to the queue
-            List<Message> loadedHistory = GSON.fromJson(reader, new TypeToken<LinkedList<Message>>() {
-            }.getType());
-            reader.close();
-            if (loadedHistory != null) {
-                messageHistory.addAll(loadedHistory);
+    private void loadMessages() {
+        File file = new File(CHAT_HISTORY_PATH);
+        if (!file.exists()) {
+            System.out.println("Chat history not found, creating a new one.");
+            messages = new LinkedList<Message>();
+            saveMessages();
+            return;
+        }
+
+        try (Reader reader = new FileReader(file)) {
+            messages = GSON.fromJson(reader, new TypeToken<List<String>>() {}.getType());
+            if (messages == null) {
+                messages = new LinkedList<Message>();
             }
-        } catch (FileNotFoundException e) {
-            System.out.println("History file not found. Starting with an empty history.");
         } catch (IOException e) {
-            throw new RuntimeException("Error loading message history from file: " + Utils.HISTORY_PATH, e);
+            System.err.println("Error loading chat history: " + e.getMessage());
         }
     }
 
-    // Save message history to file
-    private static void saveHistory() {
-        try (Writer writer = new FileWriter(Utils.getFileFromResources(Utils.HISTORY_PATH))) {
-            GSON.toJson(messageHistory, writer);
-            writer.close();
+    public void saveMessages() {
+        try {
+            File file = new File(CHAT_HISTORY_PATH);
+            File parentDir = file.getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+            try (Writer writer = new FileWriter(file)) {
+                GSON.toJson(messages, writer);
+            }
         } catch (IOException e) {
-            throw new RuntimeException("Error saving message history to file: " + Utils.HISTORY_PATH, e);
+            System.err.println("Error saving chat history: " + e.getMessage());
         }
     }
 
-    // Add a new message to the history
-    public static void addMessage(String username, String ip, Integer port, Date timestamp, String messageContent) {
-        Message message = new Message(username, ip, port, timestamp, messageContent);
-
-        // Add the new message to the queue
-        if (messageHistory.size() >= MAX_HISTORY_SIZE) {
-            messageHistory.poll(); // Remove the oldest message
-        }
-        messageHistory.offer(message);
-
-        // Persist the updated history to the file
-        saveHistory();
+    public Queue<Message> getHistory() {
+        return messages;
     }
 
-    // Retrieve all messages in the history
-    public static Queue<Message> getHistory() {
-        return new LinkedList<>(messageHistory); // Return a copy to avoid modification
+    public void addMessage(Message message) {
+        messages.add(message);
+        saveMessages();
     }
 
     public static String getFormattedHistory() {
         StringBuilder historyBuilder = new StringBuilder();
-        for (Message message : messageHistory) {
+        for (Message message : messages) {
             historyBuilder.append(message.toString()).append("\n");
         }
         return historyBuilder.toString();
