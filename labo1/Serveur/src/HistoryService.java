@@ -12,6 +12,8 @@ public class HistoryService {
     private static final String CHAT_HISTORY_PATH = Utils.HISTORY_PATH;
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
+    private static final int MAX_HISTORY_SIZE = 15;
+    
     public HistoryService() {
         loadMessages();
     }
@@ -20,15 +22,16 @@ public class HistoryService {
         File file = new File(CHAT_HISTORY_PATH);
         if (!file.exists()) {
             System.out.println("Chat history not found, creating a new one.");
-            messages = new LinkedList<Message>();
+            messages = new LinkedList<>();
             saveMessages();
             return;
         }
 
         try (Reader reader = new FileReader(file)) {
-            messages = GSON.fromJson(reader, new TypeToken<List<String>>() {}.getType());
+        	messages = GSON.fromJson(reader, new TypeToken<Queue<Message>>() {}.getType());
+
             if (messages == null) {
-                messages = new LinkedList<Message>();
+                messages = new LinkedList<>();
             }
         } catch (IOException e) {
             System.err.println("Error loading chat history: " + e.getMessage());
@@ -56,6 +59,9 @@ public class HistoryService {
 
     public void addMessage(Message message) {
         messages.add(message);
+        if (messages.size() > MAX_HISTORY_SIZE) {
+            messages.poll();
+        }
         saveMessages();
     }
 

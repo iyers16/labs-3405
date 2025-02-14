@@ -15,6 +15,8 @@ import java.net.Socket;
 
 public class AuthService {
     private Map<String, String> users = new HashMap<>();
+    private Map<Socket, String> authenticatedUsers = new HashMap<>();
+    
     private final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final String USER_DATA_PATH = Utils.USER_DATA_PATH;
 
@@ -39,6 +41,7 @@ public class AuthService {
             if (this.isValidUser(username, password)) {
                 out.writeUTF("Successful login! Welcome back " + username);
                 System.out.println(username + " has logged in.");
+                authenticatedUsers.put(clientSocket, username);
                 return true;
             } else {
                 out.writeUTF("ERROR: Incorrect username or password.");
@@ -50,6 +53,10 @@ public class AuthService {
             return false;
         }
 		return false;
+    }
+    
+    public String getUsername(Socket clientSocket) {
+    	return authenticatedUsers.get(clientSocket);
     }
 
     private boolean isValidUser(String username, String password) {

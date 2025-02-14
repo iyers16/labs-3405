@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.DataOutputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -19,15 +20,16 @@ public class MessageService {
         clients.remove(out);
     }
 
-    public void sendMessage(String message) {
-        historyService.addMessage(message); // Save to history
+    public void sendMessage(String username, String ip, int port, String messageText) {
+        Message message = new Message(username, ip, port, new Date(), messageText);
+        historyService.addMessage(message);
         broadcast(message);
     }
     
-    private void broadcast(String message) {
+    private void broadcast(Message message) {
         for (DataOutputStream out : clients) {
             try {
-                out.writeUTF(message);
+                out.writeUTF(message.toString());
                 out.flush();
             } catch (IOException e) {
                 System.err.println("Error sending message: " + e.getMessage());

@@ -12,10 +12,11 @@ public class Client {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.print("Enter the server's IP address: ");
-        String serverAddress = "127.0.0.1";  // Hardcoded for now
-
-        int port = 5000; // Hardcoded for now
+        // System.out.print("Enter the server's IP address: ");
+        
+        // TODO: change so that it accepts user inputs for serverId and serverPort. (hardcoded for faster test)
+        String serverAddress = "127.0.0.1";
+        int port = 5000;
 
         try {
             socket = new Socket(serverAddress, port);
@@ -30,14 +31,13 @@ public class Client {
                 socket.close();
                 return;
             }
-
-            // User is authenticated, proceed to chat
-            System.out.print("Enter a message: ");
-            String message = scanner.nextLine();
-            out.writeUTF(message);
-            out.flush();
-
-            System.out.println("Message sent to the server!");
+            
+            ChatHandler chatHandler = new ChatHandler(in, out, scanner);
+            chatHandler.fetchHistory();
+            chatHandler.activateListener();
+            
+            // This is a while (true) loop that can only be quit if the user input "q".
+            chatHandler.activateSender();
 
         } catch (IOException e) {
             e.printStackTrace();
