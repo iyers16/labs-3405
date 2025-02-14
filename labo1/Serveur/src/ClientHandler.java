@@ -31,7 +31,7 @@ public class ClientHandler extends Thread {
 	         this.username = authService.getUsername(clientSocket); 
 	         messageService.addClient(out); 
 	         
-	         for (Message msg : historyService.getHistory()) {
+	         for (Message msg : historyService.getLastMessages(15)) {
 	             out.writeUTF(msg.toString());
 	             out.flush();
 	         }

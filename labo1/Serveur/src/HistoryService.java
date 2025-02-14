@@ -11,8 +11,6 @@ public class HistoryService {
     private static Queue<Message> messages = new LinkedList<>();
     private static final String CHAT_HISTORY_PATH = Utils.HISTORY_PATH;
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-
-    private static final int MAX_HISTORY_SIZE = 15;
     
     public HistoryService() {
         loadMessages();
@@ -52,16 +50,15 @@ public class HistoryService {
             System.err.println("Error saving chat history: " + e.getMessage());
         }
     }
-
-    public Queue<Message> getHistory() {
-        return messages;
+    
+    public List<Message> getLastMessages(int count) {
+        List<Message> allMessages = new LinkedList<>(messages);
+        int startIndex = Math.max(0, allMessages.size() - count);
+        return allMessages.subList(startIndex, allMessages.size());
     }
 
     public void addMessage(Message message) {
         messages.add(message);
-        if (messages.size() > MAX_HISTORY_SIZE) {
-            messages.poll();
-        }
         saveMessages();
     }
 

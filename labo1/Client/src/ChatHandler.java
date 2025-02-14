@@ -37,7 +37,6 @@ public class ChatHandler {
 	    System.out.println("Write 'q' whenever you want to disconnect.\n");
 	}
 	
-	
 	public void activateListener() {
 		Thread messageListener = new Thread(() -> {
         try {
